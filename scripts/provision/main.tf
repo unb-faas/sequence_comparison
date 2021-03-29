@@ -172,15 +172,6 @@ resource "aws_network_interface_sg_attachment" "sg_attachment_ssh" {
   network_interface_id = aws_instance.machine.primary_network_interface_id
 }
 
-#resource "aws_eip" "one" {
-#  vpc                       = true
-#  network_interface         = aws_network_interface.main.id
-#  associate_with_private_ip = "10.0.10.100"
-#  depends_on = [
-#   aws_instance.machine,
-#  ]
-#}
-
 output "instance_ips" {
   value = aws_instance.machine.*.public_ip
 }

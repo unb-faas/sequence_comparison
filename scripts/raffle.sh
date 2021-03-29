@@ -4,7 +4,7 @@ if [ "${1}" == "" ]; then
   exit 1
 fi
 
-BLOCKS=$1
+BLOCKS=${1}
 TESTCASES_PATH=../sequences/test_cases_json
 TESTCASES_TARGET=../sequences/test_cases_blocks
 TESTS_LENGTH=$(seq ${BLOCKS})
@@ -16,8 +16,8 @@ getNumber(){
   N=false
   while [ "${N}" == "false" ];do
     N=$(shuf -i 1-${MAX_CASE} -n 1)
-    for i in ${NUMBERLIST};do
-      if [ "$i" == "$N" ]; then
+    for x in ${NUMBERLIST};do
+      if [ "$x" == "$N" ]; then
         N=false
       fi
     done

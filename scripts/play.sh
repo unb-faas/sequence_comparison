@@ -21,7 +21,7 @@ https://2dwcokortj.execute-api.us-west-1.amazonaws.com/default/hirschberg_1536 \
 https://9865beyfj3.execute-api.us-west-1.amazonaws.com/default/hirschberg_2048 \
 https://9wylra8v4c.execute-api.us-west-1.amazonaws.com/default/hirschberg_2560 \
 https://langmvdyu3.execute-api.us-west-1.amazonaws.com/default/hirschberg_3072"
-ONDEMAND_INSTANCE_TYPES="t2.micro c6g.medium c6g.large"
+ONDEMAND_INSTANCE_TYPES="t2.micro t2.small t2.medium"
 TESTS_CONCURRENCE="1 5 10 15 20 25 30"
 DATE=$(date +%Y%m%d%H%M%S)
 BREAK_BETWEEN_TESTS_COEFICIENT=120 #SECONDS
