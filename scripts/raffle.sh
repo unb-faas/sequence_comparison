@@ -1,7 +1,7 @@
 #/bin/bash
 if [ "${1}" == "" ]; then
   echo "Block size missing"
-  return 1
+  exit 1
 fi
 
 BLOCKS=$1

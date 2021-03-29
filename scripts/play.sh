@@ -5,13 +5,13 @@ SECRET_KEY=$2
 if [ "${ACCESS_KEY}" == "" ]; then
   echo "ACCESS_KEY missing"
   echo "Example: ./play.sh ACCESS_KEY SECRET_KEY"
-  return 1
+  exit 1
 fi
 
 if [ "${ACCESS_KEY}" == "" ]; then
   echo "SECRET_KEY missing"
   echo "Example: ./play.sh ACCESS_KEY SECRET_KEY"
-  return 1
+  exit 1
 fi
 
 RESULTS_PATH=../sequences/test_cases_executions
