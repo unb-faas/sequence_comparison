@@ -19,7 +19,7 @@ https://2dwcokortj.execute-api.us-west-1.amazonaws.com/default/hirschberg_1536 \
 https://9865beyfj3.execute-api.us-west-1.amazonaws.com/default/hirschberg_2048 \
 https://9wylra8v4c.execute-api.us-west-1.amazonaws.com/default/hirschberg_2560 \
 https://langmvdyu3.execute-api.us-west-1.amazonaws.com/default/hirschberg_3072"
-ONDEMAND_INSTANCE_TYPES="t2.micro"
+ONDEMAND_INSTANCE_TYPES="t2.micro c6g.medium c6g.large"
 TESTS_CONCURRENCE="1 5 10 15 20 25 30"
 DATE=$(date +%Y%m%d%H%M%S)
 BREAK_BETWEEN_TESTS_COEFICIENT=120 #SECONDS
@@ -67,9 +67,11 @@ testOnOnDemand(){
   for TYPE in ${ONDEMAND_INSTANCE_TYPES}; do
     echo "Provisioning ${TYPE} ..."
     cd provision
-    PROVISION=$(provisioning apply) 
+    PROVISION=$(provisioning apply)
+    echo "Wait until ${TYPE} is configured"
+    sleep 120
     IP=$(echo ${PROVISION} | sed 's/\x1b\[[0-9;]*m//g' | awk -F" = " '{print $2}' | sed -e 's/"\|,\|\[\|\]\|m\| //g')
-      if [ "${IP}" != "" ]; then
+    if [ "${IP}" != "" ]; then
       URL=http://${IP}:8000/${TYPE}
       #Creating testfiles
       for JSON in ${JSON_LIST}; do
@@ -104,8 +106,8 @@ for TEST_CONCURRENCE in ${TESTS_CONCURRENCE}; do
   mkdir -p ${RESULTS_FOLDER}
   echo "Executing test ${TEST_CONCURRENCE}"
   JSON_LIST=$(ls ${TESTCASES_PATH}/${TEST_CONCURRENCE})
-  #testOnFaaS "${JSON_LIST}" "${TESTCASES_PATH}/${TEST_CONCURRENCE}" "${RESULTS_FOLDER}" "${TEST_CONCURRENCE}"
-  #echo "waiting until test run..."
+  testOnFaaS "${JSON_LIST}" "${TESTCASES_PATH}/${TEST_CONCURRENCE}" "${RESULTS_FOLDER}" "${TEST_CONCURRENCE}"
+  echo "waiting until test run..."
   testOnOnDemand "${JSON_LIST}" "${TESTCASES_PATH}/${TEST_CONCURRENCE}" "${RESULTS_FOLDER}" "${TEST_CONCURRENCE}"
   let BREAK_BETWEEN_TESTS="${BREAK_BETWEEN_TESTS_COEFICIENT} * ${TEST_CONCURRENCE}"
   echo "waiting ${BREAK_BETWEEN_TESTS} seconds until test run..."
