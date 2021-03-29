@@ -1,8 +1,6 @@
 TESTBASE_SEQUENCES_PATH=../sequences/hiv/selected
 TARGET_PATH_JSON=../sequences/test_cases_json
-TARGET_PATH_BASE64=../sequences/test_cases_base64
 mkdir -p ${TARGET_PATH_JSON}
-mkdir -p ${TARGET_PATH_BASE64}
 
 extractSequenceContent()
 {
@@ -44,7 +42,6 @@ for sequence in $(find ${TESTBASE_SEQUENCES_PATH} | grep .fasta); do
       s2_title=${sequence_title}
       createBase64 ${s1_title} ${s1_content} ${s2_title} ${s2_content} ${execCounter}
       echo ${json} > ${TARGET_PATH_JSON}/${execCounter}.json
-      echo ${base64} > ${TARGET_PATH_BASE64}/${execCounter}.base64
       execCounter=$((execCounter + 1))
     done
 done
