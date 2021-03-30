@@ -51,10 +51,10 @@ def align( event, context):
 
     _output_filename = output_filename + str(id)
     _output_path = _type+"/"+_concurrence+"/"
-    f = open("/tmp/"+_output_filename,"w+")
+    f = open("/dev/shm/"+_output_filename,"w+")
     f.write(json.dumps(result))
     f.close()
-    s3_client.upload_file('/tmp/'+_output_filename, bucket, _output_path+_output_filename+".json")
+    s3_client.upload_file('/dev/shm/'+_output_filename, bucket, _output_path+_output_filename+".json")
     
     h = Hirschberg()
     a,b = h.align(s1,s2)
@@ -76,10 +76,10 @@ def align( event, context):
         "score":score,
         "algorithm":algorithm
     }
-    f = open("/tmp/"+_output_filename,"w+")
+    f = open("/dev/shm/"+_output_filename,"w+")
     f.write(json.dumps(result))
     f.close()
-    s3_client.upload_file('/tmp/'+_output_filename, bucket, _output_path+_output_filename+".json")
+    s3_client.upload_file('/dev/shm/'+_output_filename, bucket, _output_path+_output_filename+".json")
     return {
         'statusCode': 200,
         'body': json.dumps({"result":"done"})
