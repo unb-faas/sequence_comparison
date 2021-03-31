@@ -9,7 +9,9 @@ from alignment import Hirschberg
 import datetime
 import logging
 from botocore.exceptions import ClientError
-import os, psutil, platform
+import asyncio
+from concurrent.futures.process import ProcessPoolExecutor
+from fastapi import FastAPI
 
 output_filename = "hirschberg-"
 s3_client = boto3.client('s3')
@@ -22,7 +24,8 @@ def hAlign(a, b):
     a,b = h.align(a,b)
     return h.score(a, b)
 
-def align( event, context):
+def align( event ):
+    tempPath = "/dev/shm/"
     bd = event["body"]
     base64_message = bd
     base64_bytes = base64_message.encode('ascii')
@@ -51,10 +54,10 @@ def align( event, context):
 
     _output_filename = output_filename + str(id)
     _output_path = _type+"/"+_concurrence+"/"
-    f = open("/dev/shm/"+_output_filename,"w+")
+    f = open(tempPath+_output_filename,"w+")
     f.write(json.dumps(result))
     f.close()
-    s3_client.upload_file('/dev/shm/'+_output_filename, bucket, _output_path+_output_filename+".json")
+    s3_client.upload_file(tempPath+_output_filename, bucket, _output_path+_output_filename+".json")
     
     h = Hirschberg()
     a,b = h.align(s1,s2)
@@ -76,10 +79,10 @@ def align( event, context):
         "score":score,
         "algorithm":algorithm
     }
-    f = open("/dev/shm/"+_output_filename,"w+")
+    f = open(tempPath+_output_filename,"w+")
     f.write(json.dumps(result))
     f.close()
-    s3_client.upload_file('/dev/shm/'+_output_filename, bucket, _output_path+_output_filename+".json")
+    s3_client.upload_file(tempPath+_output_filename, bucket, _output_path+_output_filename+".json")
     return {
         'statusCode': 200,
         'body': json.dumps({"result":"done"})
@@ -99,6 +102,21 @@ app.add_middleware(
 class Item(BaseModel):
     base64: str
 
+async def run_in_process(fn, *args):
+    loop = asyncio.get_event_loop()
+    return await loop.run_in_executor(app.state.executor, fn, *args)
+
 @app.put("/localhost")
-def play(item: Item):
-    return align({"body":item.base64}, "")
+async def play(item: Item):
+    res = await run_in_process(align, {"body":item.base64})
+    return {"result": res}
+
+
+@app.on_event("startup")
+async def on_startup():
+    app.state.executor = ProcessPoolExecutor()
+
+
+@app.on_event("shutdown")
+async def on_shutdown():
+    app.state.executor.shutdown()
