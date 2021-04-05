@@ -10,6 +10,13 @@ variable "secretkey" {
   type = string
 }
 
+resource "random_string" "random" {
+  length           = 16
+  special          = false
+  number           = false
+  override_special = "/@£$"
+}
+
 provider "aws" {
   region     = "us-west-1"
   access_key = var.accesskey
@@ -67,10 +74,10 @@ resource "aws_network_acl" "Public_NACL" {
     Name = "Public NACL"
   }
 }
-resource "aws_internet_gateway" "IGW_teste" {
+resource "aws_internet_gateway" "IGW" {
  vpc_id = aws_vpc.main.id
  tags = {
-        Name = "Internet gateway teste"
+        Name = "Internet gateway terraform"
 }
 } 
 resource "aws_route_table" "Public_RT" {
@@ -82,7 +89,7 @@ resource "aws_route_table" "Public_RT" {
 resource "aws_route" "internet_access" {
   route_table_id         = aws_route_table.Public_RT.id
   destination_cidr_block = "0.0.0.0/0"
-  gateway_id             = aws_internet_gateway.IGW_teste.id
+  gateway_id             = aws_internet_gateway.IGW.id
 }
 resource "aws_route_table_association" "Public_association" {
   subnet_id      = aws_subnet.main_subnet.id
@@ -123,7 +130,7 @@ resource "aws_security_group" "allow_ssh" {
 }
 
 resource "aws_key_pair" "deployer" {
-  key_name   = "deployer-key"
+  key_name   = random_string.random.result
   public_key = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDJTNheRcHkQfiXTN6DDtUGKxnfbmtLHGTZDmX9PJkFgZNXM4xxvPQd8mk0lZ4gXKwBVSdv5oAAf50f7YxePp5rL/17nAItQvvZw0KKYWFMhr448c2FGwVMDpkyEHBUEFuV9wMnndaNn4Hnq5EKbQ2LrpVXiPuaIeSSUrlLqvK4eCHUuq2ceD6Nn1NjB3zoJLqclJIk4cdGiZPywjSW2A2TJtDKc1WcgAw9pbHSfdHuR1LXB0mMfxiHGpV6+Sdbq6I65oK7jneLWwEZmAql83Wf9wXfc4gX+Z3ixw9TOj+qwaJAXv6kpxG7DoC6sqY7MSht17NNn9thZsF7fRmCIQ2+2xLrKv9RiaMhIBx1L2Oy44gpX0N+NlvjL+BwsG9WxzKKwu44gQfdjEH69bCNKGT+MHYhQLPdExpL748tjRg2u+VYsGNEn7jwvsjl+00uzM00mOAvJI1UdRPkrUbMuLZdQmff+oyv1cb6s/dpXuUp4vihtPVE7OegJgXY85fWHyE= leonardo@leonardo-Avell"
 }
 
@@ -158,7 +165,6 @@ resource "aws_instance" "machine" {
               cd /app/sequence_comparison/algorithms/hirschberg/Python/app/
               sed -i "s/\/localhost/\/${var.instancetype}/" main.py
               ./start.sh &
-              #teste
             EOF 
 }
 

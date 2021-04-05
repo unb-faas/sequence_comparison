@@ -108,9 +108,9 @@ async def run_in_process(fn, *args):
 
 @app.put("/localhost")
 async def play(item: Item):
-    return align({"body":item.base64})
-    ##res = await run_in_process(align, {"body":item.base64})
-    ##return {"result": res}
+    #return align({"body":item.base64})
+    res = await run_in_process(align, {"body":item.base64})
+    return {"result": res}
 
 
 @app.on_event("startup")
