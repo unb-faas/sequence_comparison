@@ -25,7 +25,7 @@ The source codes of FaaS deployments and Python native (with fastapi) applicatio
     - Runs the alignments based on paramethers passed: credentials, type of test, debug, etc. In case of on-demand instance this script will provision the instance using the blueprint defined for Terraform in "provision" folder, and in the end of each test case the instance will be deprovisioned.
  - **sumDate.sh** 
     - Calculates the average of date in a list. This is script is used to calculate de full results and can be used for obtain partial results.
- - **generateResults.sh
+ - **generateResults.sh**
     - After the execution of the test cases, this script can be used to generate the full results in CSV format. From a path informed, it will read the generated JSON files and extrac the metrics used on this study such as "test duration", "average alignment duration", "average score obtained", "average legnth of sequences", etc.
 
 ## Sequences
