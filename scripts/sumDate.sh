@@ -1,5 +1,5 @@
 #!/bin/sh
-#./sumDate.sh "`echo $(cat ~/Desktop/ondemand-t3.small/5/* | jq '.duration') | sed 's/"//g'`"
+# EXAMPLE: ./sumDate.sh "`echo $(cat ~/Desktop/ondemand-t3.small/5/* | jq '.duration') | sed 's/"//g'`"
 EPOCH='jan 1 1970'
 sum=0
 count=0

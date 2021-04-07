@@ -54,16 +54,13 @@ https://2dwcokortj.execute-api.us-west-1.amazonaws.com/default/hirschberg_1536 \
 https://9865beyfj3.execute-api.us-west-1.amazonaws.com/default/hirschberg_2048 \
 https://9wylra8v4c.execute-api.us-west-1.amazonaws.com/default/hirschberg_2560 \
 https://langmvdyu3.execute-api.us-west-1.amazonaws.com/default/hirschberg_3072"
-ONDEMAND_INSTANCE_TYPES="c6g.4xlarge t4g.xlarge"
-                         #1vCPU   2vCPU     4vCPU      8vCPU       16vcpu      32vcpu
-#ONDEMAND_INSTANCE_TYPES="t2.micro t4g.micro t4g.xlarge t4g.2xlarge c5a.4xlarge c5a.8xlarge"
-#ONDEMAND_INSTANCE_TYPES="t2.micro t4g.micro t4g.xlarge t4g.2xlarge c5a.4xlarge"
-ONDEMAND_INSTANCE_TYPES="c5a.4xlarge"
-#ONDEMAND_INSTANCE_TYPES="c5a.8xlarge"
+
+                         #4vCPU     8vCPU       16vcpu      32vcpu
+ONDEMAND_INSTANCE_TYPES="t3a.xlarge t4g.2xlarge c5a.4xlarge c5a.8xlarge"
+
 LOCAL_INSTANCE="localhost"
 TESTS_CONCURRENCE="1 20 40 60 80 100"
 DATE=$(date +%Y%m%d%H%M%S)
-BREAK_BETWEEN_TESTS_COEFICIENT=120 #SECONDS
 
 createBase64(){
     json=$1
@@ -83,9 +80,9 @@ testOnFaaS(){
   TYPE=$(echo ${INSTANCE} | awk -F'_' '{print $2}' )
   for JSON in ${JSON_LIST}; do
     DATA=$(cat ${RESULTS_FOLDER}/${JSON}.base64)
-    curl ${OUTPUT_CONFIG} -X PUT -k -i "${URL}" --data "${DATA}" &
+    curl ${OUTPUT_CONFIG} -X PUT -k -i "${INSTANCE}" --data "${DATA}" &
   done
-  let BREAK_BETWEEN_TESTS="${BREAK_BETWEEN_TESTS_COEFICIENT} * ${TEST_CONCURRENCE}"
+  let BREAK_BETWEEN_TESTS="${TYPE} / 2"
   echo "waiting ${BREAK_BETWEEN_TESTS} seconds until test runs..."
   sleep ${BREAK_BETWEEN_TESTS}  
 }
@@ -97,7 +94,6 @@ provisioning(){
   terraform init
   terraform refresh -var "accesskey=${ACCESS_KEY}" -var "secretkey=${SECRET_KEY}" -var "instancetype=${INSTANCE}"
   if [ "${ACTION}" == "apply" ]; then
-    terraform destroy -auto-approve -var "accesskey=${ACCESS_KEY}" -var "secretkey=${SECRET_KEY}" -var "instancetype=${INSTANCE}"
     PROVISION=$(terraform apply -auto-approve -var "accesskey=${ACCESS_KEY}" -var "secretkey=${SECRET_KEY}" -var "instancetype=${INSTANCE}")
   fi
   if [ "${ACTION}" == "destroy" ]; then
@@ -117,7 +113,17 @@ provisioning(){
       exit 3
     fi
     echo "Wait until ${INSTANCE} is configured"
-    sleep 180
+    TIMEOUT_COUNT=180
+    SERVICE_UP=false
+    while [ ${TIMEOUT_COUNT} -gt 0 ] && [ "${SERVICE_UP}" == "false" ]; do
+      TEST=$(curl http://${IP}:8000 | grep "\"detail\":")
+      if [ "${TEST}" != "" ]; then
+        SERVICE_UP=true
+      else
+        TIMEOUT_COUNT=$((TIMEOUT_COUNT - 1))
+      fi
+      sleep 1
+    done 
   fi
   cd -  
 }
