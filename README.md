@@ -1,9 +1,23 @@
-# Biological sequences comparison
-This project intend to perform biological sequences alignment using FASTA format in different cloud services such as on-demand instances (AWS EC2) and function as a service (Lambda). 
+# Biological sequences alignment
+This project intends to perform biological sequences alignment using FASTA format in different cloud services such as on-demand instances (AWS EC2) and function as a service (Lambda). 
 
 ## Alghorithm
 
 - Hirschberg
+
+## Application
+
+This project was developed on Python 3.6 and used these libraries:
+  - alignment (https://github.com/leebird/alignment)
+  - boto3 (AWS S3 integration)
+  - base64 (request data manipulation)
+  - fastapi (used for receive API requests on on-demand instances)
+  - asyncio (used to perfom paralel processment on on-demand instances)
+
+The source codes of FaaS deployments and Python native (with fastapi) application is available on https://github.com/unb-faas/sequence_comparison_app
+
+## Worflow
+![Workflow image](images/workflow.png)
 
 ## Scripts
  - **generateTestCases.sh**
@@ -14,7 +28,7 @@ This project intend to perform biological sequences alignment using FASTA format
     - Runs the alignments based on paramethers passed: credentials, type of test, debug, etc. In case of on-demand instance this script will provision the instance using the blueprint defined for Terraform in "provision" folder, and in the end of each test case the instance will be deprovisioned.
  - **sumDate.sh** 
     - Calculates the average of date in a list. This is script is used to calculate de full results and can be used for obtain partial results.
- - **generateResults.sh
+ - **generateResults.sh**
     - After the execution of the test cases, this script can be used to generate the full results in CSV format. From a path informed, it will read the generated JSON files and extrac the metrics used on this study such as "test duration", "average alignment duration", "average score obtained", "average legnth of sequences", etc.
 
 ## Sequences
@@ -130,3 +144,7 @@ This project intend to perform biological sequences alignment using FASTA format
 - MN692145.1HIV-1isolatePt1-M26-13-AMBI-SangfromUSA,completegenome.fasta
 - MN692146.1HIV-1isolatePt1-M26-NFL-104-PBiofromUSA,completegenome.fasta
 - MN692147.1HIV-1isolatePt1-M26-NFL-30-PBiofromUSA,completegenome.fasta
+
+## Results
+
+  The results of this study is available on results folder.
