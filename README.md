@@ -1,4 +1,4 @@
-# Biological sequences comparison
+# Biological sequences alignment
 This project intends to perform biological sequences alignment using FASTA format in different cloud services such as on-demand instances (AWS EC2) and function as a service (Lambda). 
 
 ## Alghorithm
