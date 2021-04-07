@@ -16,7 +16,7 @@ This project was developed on Python 3.6 and used these libraries:
 
 The source codes of FaaS deployments and Python native (with fastapi) application is available on https://github.com/unb-faas/sequence_comparison_app
 
-## Worflow
+## Workflow
 ![Workflow image](images/workflow.png)
 
 ## Scripts
