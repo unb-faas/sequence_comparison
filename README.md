@@ -5,6 +5,17 @@ This project intend to perform biological sequences alignment using FASTA format
 
 - Hirschberg
 
+## Application
+
+This project was developed on Python 3.6 and used these libraries:
+  - alignment (https://github.com/leebird/alignment)
+  - boto3 (AWS S3 integration)
+  - base64 (request data manipulation)
+  - fastapi (used for receive API requests on on-demand instances)
+  - asyncio (used to perfom paralel processment on on-demand instances)
+
+The sources codes of FaaS deployments and Python native (with fastapi) application is available on https://github.com/unb-faas/sequence_comparison_app
+
 ## Scripts
  - **generateTestCases.sh**
     - Reads files with FASTAs in a passed directory and generates files (.json) containing 2 sequences to be used as "test cases".
