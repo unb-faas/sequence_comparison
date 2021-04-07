@@ -1,5 +1,5 @@
 # Biological sequences comparison
-This project intend to perform biological sequences alignment using FASTA format in different cloud services such as on-demand instances (AWS EC2) and function as a service (Lambda). 
+This project intends to perform biological sequences alignment using FASTA format in different cloud services such as on-demand instances (AWS EC2) and function as a service (Lambda). 
 
 ## Alghorithm
 
@@ -14,7 +14,7 @@ This project was developed on Python 3.6 and used these libraries:
   - fastapi (used for receive API requests on on-demand instances)
   - asyncio (used to perfom paralel processment on on-demand instances)
 
-The sources codes of FaaS deployments and Python native (with fastapi) application is available on https://github.com/unb-faas/sequence_comparison_app
+The source codes of FaaS deployments and Python native (with fastapi) application is available on https://github.com/unb-faas/sequence_comparison_app
 
 ## Scripts
  - **generateTestCases.sh**
@@ -141,3 +141,7 @@ The sources codes of FaaS deployments and Python native (with fastapi) applicati
 - MN692145.1HIV-1isolatePt1-M26-13-AMBI-SangfromUSA,completegenome.fasta
 - MN692146.1HIV-1isolatePt1-M26-NFL-104-PBiofromUSA,completegenome.fasta
 - MN692147.1HIV-1isolatePt1-M26-NFL-30-PBiofromUSA,completegenome.fasta
+
+## Results
+
+  The results of this study is available on results folder.
