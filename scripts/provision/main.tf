@@ -10,6 +10,10 @@ variable "secretkey" {
   type = string
 }
 
+variable "ami" {
+  type = string
+}
+
 resource "random_string" "random" {
   length           = 16
   special          = false
@@ -24,7 +28,7 @@ provider "aws" {
 }
 
 resource "aws_security_group" "allow_http" {
-  name        = "allow_http"
+  name        = "allow_http_${random_string.random.result}"
   description = "Allow http inbound traffic"
   #vpc_id = aws_vpc.main.id
 
@@ -44,7 +48,7 @@ resource "aws_security_group" "allow_http" {
 }
 
 resource "aws_security_group" "allow_ssh" {
-  name        = "allow_ssh"
+  name        = "allow_ssh_${random_string.random.result}"
   description = "Allow ssh inbound traffic"
 
   ingress {
@@ -61,7 +65,7 @@ resource "aws_key_pair" "deployer" {
 }
 
 resource "aws_instance" "machine" {
-  ami          = "ami-0ec6517f6edbf8044"
+  ami          = var.ami
   instance_type = var.instancetype
   key_name      = aws_key_pair.deployer.key_name
   tags = {
@@ -70,11 +74,11 @@ resource "aws_instance" "machine" {
 
   user_data = <<-EOF
               #!/bin/bash
-              yum install git python36 gcc python36-devel aws-cli -y
-              python3.6 -m venv .venv
+              yum install git python3 gcc python3-devel aws-cli -y
+              python3 -m venv .venv
+              pip3 install fastapi psutil boto3
+              pip3 install uvicorn[standard]
               source .venv/bin/activate
-              pip-3.6 install fastapi psutil boto3
-              pip-3.6 install uvicorn[standard]
               mkdir ~/.aws
               echo "[default]" > ~/.aws/credentials
               echo "aws_access_key_id = " ${var.accesskey} >> ~/.aws/credentials
@@ -84,6 +88,7 @@ resource "aws_instance" "machine" {
               git clone https://github.com/unb-faas/sequence_comparison_app.git
               cd /app/sequence_comparison_app/algorithms/hirschberg/Python/app/
               sed -i "s/\/localhost/\/${var.instancetype}/" main.py
+              cp /usr/local/bin/uvicorn /usr/bin/uvicorn
               ./start.sh &
             EOF 
 }

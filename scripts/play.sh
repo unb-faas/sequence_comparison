@@ -47,26 +47,27 @@ if [ "${TESTS}" == "" ]; then
   exit 1
 fi
 
-RESULTS_PATH=../sequences/test_cases_executions
-TESTCASES_PATH=../sequences/test_cases_blocks
+RESULTS_PATH=../sequences/covid19/test_cases_executions
+TESTCASES_PATH=../sequences/covid19/test_cases_blocks
 FAAS_URLS="https://64g3u3thci.execute-api.us-west-1.amazonaws.com/default/hirschberg_1024 \
 https://2dwcokortj.execute-api.us-west-1.amazonaws.com/default/hirschberg_1536 \
 https://9865beyfj3.execute-api.us-west-1.amazonaws.com/default/hirschberg_2048 \
 https://9wylra8v4c.execute-api.us-west-1.amazonaws.com/default/hirschberg_2560 \
 https://langmvdyu3.execute-api.us-west-1.amazonaws.com/default/hirschberg_3072"
 
-                         #4vCPU     8vCPU       16vcpu      32vcpu
-ONDEMAND_INSTANCE_TYPES="t3a.xlarge t4g.2xlarge c5a.4xlarge c5a.8xlarge"
+                         #4vCPU     8vCPU       16vcpu      32vcpu   
+ONDEMAND_INSTANCE_TYPES="t3a.xlarge c5a.2xlarge c5a.4xlarge c5a.8xlarge" #x86
+ONDEMAND_INSTANCE_TYPES="${ONDEMAND_INSTANCE_TYPES} t4g.xlarge c6g.2xlarge c6g.4xlarge c6g.8xlarge" #arm
 
 LOCAL_INSTANCE="localhost"
 TESTS_CONCURRENCE="1 20 40 60 80 100"
 DATE=$(date +%Y%m%d%H%M%S)
 
 createBase64(){
-    json=$1
+    json=$(echo $1 | sed -e 's/ //g' | rev | cut -c2- | rev)
     type=$2
     concurrence=$3
-    echo "${json:$i:-1},\"type\":\"${type}\",\"concurrence\":\"${concurrence}\"}" | tr '\r' ' ' | tr '\n' ' ' | tr '\t' ' '  | sed -e 's/ //g ' > /tmp/jsonToBase64.tmp
+    echo "${json},\"type\":\"${type}\",\"concurrence\":\"${concurrence}\"}" | tr '\r' ' ' | tr '\n' ' ' | tr '\t' ' '  | sed -e 's/ //g ' > /tmp/jsonToBase64.tmp
     base64=$(base64 /tmp/jsonToBase64.tmp)
     rm /tmp/jsonToBase64.tmp
 }
@@ -89,20 +90,26 @@ testOnFaaS(){
 
 provisioning(){
   ACTION=$1
+  if [ "$(echo ${INSTANCE} | grep 'c6g' )" != "" ] || [ "$(echo ${INSTANCE} | grep 't4g' )" != "" ]; then  
+    AMI="ami-00b392311130b4617" #arm
+  else
+    AMI="ami-08629b3250aa07841" #x86
+  fi
   echo "Provisioning to ${ACTION}: ${INSTANCE} ..."
   cd provision
   terraform init
-  terraform refresh -var "accesskey=${ACCESS_KEY}" -var "secretkey=${SECRET_KEY}" -var "instancetype=${INSTANCE}"
+  terraform refresh -var "accesskey=${ACCESS_KEY}" -var "secretkey=${SECRET_KEY}" -var "instancetype=${INSTANCE}" -var "ami=${AMI}"
   if [ "${ACTION}" == "apply" ]; then
-    PROVISION=$(terraform apply -auto-approve -var "accesskey=${ACCESS_KEY}" -var "secretkey=${SECRET_KEY}" -var "instancetype=${INSTANCE}")
+    PROVISION=$(terraform apply -auto-approve -var "accesskey=${ACCESS_KEY}" -var "secretkey=${SECRET_KEY}" -var "instancetype=${INSTANCE}" -var "ami=${AMI}")
   fi
   if [ "${ACTION}" == "destroy" ]; then
-    terraform destroy -auto-approve -var "accesskey=${ACCESS_KEY}" -var "secretkey=${SECRET_KEY}" -var "instancetype=${INSTANCE}"
+    terraform destroy -auto-approve -var "accesskey=${ACCESS_KEY}" -var "secretkey=${SECRET_KEY}" -var "instancetype=${INSTANCE}"  -var "ami=${AMI}"
     rm -rf terraform.tfstate*
   else
     echo ${PROVISION}
     echo ${PROVISION} >> /tmp/provision-${INSTANCE}
-    IP=$(echo ${PROVISION} | sed 's/\x1b\[[0-9;]*m//g' | awk -F"instance_ips = " '{print $2}' | sed -e 's/"\|,\|\[\|\]\|m\| //g')
+    IP=$(echo ${PROVISION} | sed 's/\x1b\[[0-9;]*m//g' | awk -F"instance_ips = " '{print $2}' | sed -e 's/"\|,\|\[\|\]\|m\| //g' | sed -e 's/"//g' | sed -e 's/\[//g' | sed -e 's/\]//g' | sed -e 's/,//g' | sed -e 's/ //g')
+
     echo "Instance IP: ${IP}"
     if [ "${IP}" == "" ]; then
       echo "IP is null"
@@ -138,10 +145,10 @@ testOnOnDemand(){
   URL=http://${IP}:8000/${INSTANCE}
   for JSON in ${JSON_LIST}; do
     DATA=$(cat ${RESULTS_FOLDER}/${JSON}.base64)
-    curl ${OUTPUT_CONFIG} -X PUT -k -i "${URL}" --data "{\"base64\":\"${DATA}\"}" &
+    curl ${OUTPUT_CONFIG} -H 'Content-Type: application/json' -X PUT -k -i "${URL}" --data "{\"base64\":\"${DATA}\"}" &
   done
   echo "waiting until test runs..."
-  while [ "$(ps -aux | grep curl | grep ${IP})" != "" ]; do
+  while [ "$(ps | grep curl | grep ${IP})" != "" ]; do
     echo -e "\r."
     sleep 10
   done
@@ -168,7 +175,6 @@ testOnLocalhost(){
   sleep 30
 }
 
-set -x
 for TEST in ${TESTS}; do
    case $TEST in
     'faas') 
