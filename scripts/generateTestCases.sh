@@ -1,5 +1,5 @@
-TESTBASE_SEQUENCES_PATH=../sequences/hiv/selected
-TARGET_PATH_JSON=../sequences/test_cases_json
+TESTBASE_SEQUENCES_PATH=../sequences/covid19/selected
+TARGET_PATH_JSON=../sequences/covid19/test_cases_json
 mkdir -p ${TARGET_PATH_JSON}
 
 extractSequenceContent()

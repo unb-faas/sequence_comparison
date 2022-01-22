@@ -5,8 +5,8 @@ if [ "${1}" == "" ]; then
 fi
 
 BLOCKS=${1}
-TESTCASES_PATH=../sequences/test_cases_json
-TESTCASES_TARGET=../sequences/test_cases_blocks
+TESTCASES_PATH=../sequences/covid19/test_cases_json
+TESTCASES_TARGET=../sequences/covid19/test_cases_blocks
 TESTS_LENGTH=$(seq ${BLOCKS})
 MAX_CASE=$(ls -la ${TESTCASES_PATH} | wc -l)
 MAX_CASE=$((MAX_CASE - 3))
@@ -15,7 +15,7 @@ MAX_CASE=$((MAX_CASE - 3))
 getNumber(){
   N=false
   while [ "${N}" == "false" ];do
-    N=$(shuf -i 1-${MAX_CASE} -n 1)
+    N=$(gshuf -i 1-${MAX_CASE} -n 1)
     for x in ${NUMBERLIST};do
       if [ "$x" == "$N" ]; then
         N=false
@@ -32,7 +32,7 @@ for i in ${TESTS_LENGTH}; do
   CONT=1
   while [ ${CONT} -le ${i} ]; do
     getNumber
-    ln -s ../../${TESTCASES_PATH}/${N}.json ${FOLDER}/${N}.json
+    ln -s ../../../${TESTCASES_PATH}/${N}.json ${FOLDER}/${N}.json
     CONT=$((CONT + 1))
   done
 done

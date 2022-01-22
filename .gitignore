@@ -1,5 +1,6 @@
 .base64
-.lock.hcl
-.terraform
-.tfstate
-.tfstate.backup
+*.lock.hcl
+*.terraform
+*.tfstate
+*.tfstate.backup
+*.DS_*
